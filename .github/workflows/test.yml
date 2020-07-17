@@ -5,36 +5,22 @@ on:
   pull_request:
 
 jobs:
-  test:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-          - macOS-latest
-          - windows-latest
-        nim_version:
-          - '1.2.4'
-          - 'stable'
+        nimversion: [stable]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v1
-      - name: Cache choosenim
-        id: cache-choosenim
-        uses: actions/cache@v1
-        with:
-          path: ~/.choosenim
-          key: ${{ runner.os }}-choosenim-${{ matrix.nim_version }}
-      - name: Cache nimble
-        id: cache-nimble
-        uses: actions/cache@v1
-        with:
-          path: ~/.nimble
-          key: ${{ runner.os }}-nimble-${{ hashFiles('*.nimble') }}
-      - uses: jiro4989/setup-nim-action@v1.0.2
-        with:
-          nim-version: ${{ matrix.nim_version }}
-
-      - name: nimble install
-        run: nimble install
-      - name: nimble test
-        run: nimble test
+    - uses: actions/checkout@v1
+    - uses: iffy/install-nim@master
+      with:
+        nimversion: ${{ matrix.nimversion }}
+    - name: Install deps
+      run: |
+        nimble refresh
+        nimble install -y
+    - name: Build
+      run: nimble build
+    - name: Test
+      run: nimble test
