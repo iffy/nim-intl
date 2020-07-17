@@ -16,10 +16,10 @@ nimble install https://github.com/iffy/nim-intl.git
 - [x] Really fast message lookup
 - [x] Flexibility beyond pluralizing
 - [x] Multiple message repositories (e.g. your program has one list of messages, and a library you import has its own)
-- [ ] Extracted messages automatically update message files during compilation
+- [x] Extracted messages can automatically update message files during compilation (if you want)
 - [ ] Select a single locale at compile time and avoid all runtime message lookups.
 - [ ] Warn about duplicate message keys for non-matching values
-
+- [ ] Don't require labels for `proc` messages.  See <https://github.com/nim-lang/Nim/issues/15004>
 
 # Examples
 
@@ -27,7 +27,7 @@ This program prints out one translateable message (we'll just call these "messag
 
 ```nim
 import intl
-intlDomain "myprogram"
+intlCatalog "myprogram"
 
 # `tr` marks strings for translation
 echo tr"Hello, World!"
@@ -49,7 +49,7 @@ Let's put the `baseMessages:` block in as well as the start of a locale for Span
 
 ```nim
 import intl
-intlDomain "myprogram"
+intlCatalog "myprogram"
 
 baseMessages:
   msg "s_rhellowor71994", r"Hello, World!"
@@ -79,7 +79,7 @@ Use `setLocale()` to change the locale.  The following will print `¡Hola!`:
 
 ```nim
 import intl
-intlDomain "myprogram"
+intlCatalog "myprogram"
 
 baseMessages:
   msg "s_rhellowor71994", r"Hello, World!"
@@ -116,7 +116,7 @@ messages "es":
 
 ```nim
 import intl
-intlDomain "myprogram"
+intlCatalog "myprogram"
 
 echo "You have " & tr("num-animals", proc(cats:int, dogs:int):string =
   result = $cats & " "
@@ -178,6 +178,25 @@ Messages within each `messages "locale":` block have the following format:
 **`<key>`** is the auto-generated or user-provided unique key for this message.  Users should leave this alone.
 
 **`<value>`** is the localized value for the message.  Users should change this.
+
+# Automatic catalog updating
+
+If you want `intl` to automatically update message catalogs, call the postlude like this:
+
+```nim
+import intl
+intlCatalog "mycatalog"
+intlPostlude(currentSourcePath(), "trans")
+```
+
+This will cause files to be written in `./trans`.  After the first time running this, change your main Nim file to this:
+
+```nim
+import ./trans/all
+intlPostlude(currentSourcePath(), "trans")
+```
+
+Add locales by creating empty Nim files named `./trans/XX.nim` where `XX` is the locale name.  Recompile and they will be populated with your messages.
 
 # Design
 

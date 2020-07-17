@@ -44,7 +44,7 @@ test "import":
   withtmpdir:
     writeFile("src.nim", dedent"""
     import intl
-    intlDomain "test"
+    intlCatalog "test"
     echo tr"foo"
     """)
     discard comp("src.nim")
@@ -55,7 +55,7 @@ test "managedir":
     let trans_dir = absolutePath("."/"trans")
     writeFile("src.nim", dedent &"""
     import intl
-    intlDomain "test"
+    intlCatalog "test"
     echo tr("hi","hi")
     intlPostlude(currentSourcePath(), autoDir="trans")
     """)
@@ -68,7 +68,7 @@ test "managedir":
     checkpoint "=== " & basefile
     checkpoint basefileguts
     check "\"hi\"" in basefileguts
-    check "intlDomain \"test\"" in basefileguts
+    check "intlCatalog \"test\"" in basefileguts
 
     let allfile = "trans"/"all.nim"
     assert existsFile(allfile)
@@ -95,7 +95,7 @@ test "managedir":
     basefileguts = basefile.readFile()
     checkpoint "=== " & basefile
     checkpoint basefileguts
-    check "intlDomain \"test\"" in basefileguts
+    check "intlCatalog \"test\"" in basefileguts
 
     allfileguts = allfile.readFile()
     checkpoint "=== " & allfile

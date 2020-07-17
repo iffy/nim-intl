@@ -60,10 +60,10 @@ proc dedent*(x:string):string =
 
 
 
-template intlDomain*(name:string) =
-  ## Create a new l18n/i10n domain
+template intlCatalog*(name:string) =
+  ## Create a new message catalog.  You typically only need one per program.
   ##
-  ## This makes a new set of `tr` procs for translating.
+  ## This makes a new set of `tr` procs for marking messages.
   import tables
   export tables
   
@@ -76,18 +76,18 @@ template intlDomain*(name:string) =
 
   proc handleTr(key:string, message:NimNode):NimNode {.compileTime.} =
     ## Generate the NimNode that will become the localised value
-    # Extract message for later inclusion in the domain messages
+    # Extract message for later inclusion in the catalog
     extracted_messages[key] = message.copyNimTree()
 
     # Produce the code to get the right value at runtime/compile time
     if base_message_tab.hasKey(key):
-      # This message is in the domain.
+      # This message is in the catalog.
       nnkDotExpr.newTree(
         newIdentNode(selectedMessages_varname),
         newIdentNode(key)
       )
     else:
-      # This message is not known to the domain.
+      # This message is not known to the catalog.
       # Use the source-provided value.
       message
 
@@ -151,7 +151,7 @@ template intlDomain*(name:string) =
       writeFile(autoDir/"base.nim", dedent("""
       import intl
       export intl
-      intlDomain """ & "\"" & name & "\"\L" & """
+      intlCatalog """ & "\"" & name & "\"\L" & """
       """) & baseMessages_string)
       echo "intl: wrote " & autoSubDir/"base.nim"
       let nimfiles = utilityCall("ls", autoDir).output.splitLines()
@@ -249,7 +249,7 @@ template intlDomain*(name:string) =
       staticIntlPostlude(callingSrcPath.parentDir(), autoDir)
   
   template baseMessages*(body:untyped):untyped =
-    ## Define the set of messages within this domain
+    ## Define the set of messages within this catalog
     
     block:
       static:
@@ -378,7 +378,7 @@ template intlDomain*(name:string) =
         body
     
     macro mkMessageGenerator():untyped {.genSym.} =
-      ## Generate a proc that will return a Messages_DOMAINNAME
+      ## Generate a proc that will return a Messages_CATALOGNAME
       ## filled with the messages for this locale and add it
       ## to the localeChoosers table
       var paramTree = nnkTupleConstr.newTree()
