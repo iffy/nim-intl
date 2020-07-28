@@ -2,15 +2,9 @@ The `intl` Nim package make it easy to do internationalization (i18n) and locali
 
 This is alpha-quality.  Please file issues for any bugs you encounter.
 
-## Installation
+# Features
 
-```
-nimble install https://github.com/iffy/nim-intl.git
-```
-
-## Features
-
-- [x] Terse message format
+- [x] Compact message format
 - [x] Automatic message extraction during compilation
 - [x] Message format indicates what's been translated
 - [x] Really fast message lookup
@@ -21,9 +15,81 @@ nimble install https://github.com/iffy/nim-intl.git
 - [ ] Warn about duplicate message keys for non-matching values
 - [ ] Don't require labels for `proc` messages.  See <https://github.com/nim-lang/Nim/issues/15004>
 
-# Examples
+# Quickstart
 
-This program prints out one translateable message (we'll just call these "messages" from here):
+Intall `intl`:
+
+```
+nimble install https://github.com/iffy/nim-intl.git
+```
+
+Run the following to generate some boilerplate in the `./trans` directory:
+
+```
+intl init
+```
+
+Follow the instructions emitted by `intl init` to incorporate the
+newly generated catalog into your code.  For instance, add locales for English and Chinese:
+
+```
+intl add en
+intl add zh
+```
+
+Create a Nim file (or add some of the following to an existing one):
+
+```nim
+# main.nim
+import ./trans/all
+if paramCount() > 0:
+  setLocale(paramStr(1))
+echo tr"Hello, World!"
+intlPostlude(currentSourcePath(), "trans")
+```
+
+Compile, which will automatically extract messages for translation
+in locale-specific files within `./trans/`:
+
+```
+nim c main.nim
+```
+
+Edit `trans/zh.nim` to perform translation.
+
+```nim
+# trans/zh.nim - Before translating
+import ./base
+messages "zh":
+  todo 71994, "s_rhellowor71994", r"Hello, World!"
+```
+
+```nim
+# trans/zh.nim - After translating
+import ./base
+messages "zh":
+  done 71994, "s_rhellowor71994", r"你好，世界！"
+```
+
+Recompile:
+
+```
+nim c main.nim
+```
+
+Run the localized program!
+
+```
+$ ./main en
+Hello, World!
+$ ./main zh
+你好，世界！
+```
+
+
+# More examples
+
+This program prints out one translateable message:
 
 ```nim
 import intl

@@ -428,6 +428,65 @@ when isMainModule:
   of "pwd":
     echo "getCurrentDir: ", getCurrentDir()
     echo "currentSourcePath: ", currentSourcePath()
+  of "init":
+    let transdir = "."/"trans"
+    if transdir.existsDir:
+      echo "Error: directory " & transdir & " already exists"
+      quit(1)
+    transdir.createDir()
+    let base_nim = transdir / "base.nim"
+    let all_nim = transdir / "all.nim"
+
+    echo "Writing " & base_nim
+    writeFile(base_nim, dedent"""
+    import intl
+    export intl
+    
+    intlCatalog "myproject"
+    baseMessages:
+      discard
+    """)
+    
+    echo "Writing " & all_nim
+    writeFile(all_nim, dedent"""
+    import intl
+    import ./base
+    
+    export intl
+    export base
+    """)
+    
+    echo dedent"""
+    Next steps:
+    
+    1. Add this to any Nim files you want to localize:
+
+      import ./trans/all
+    
+    2. At the end of your main Nim file add the following:
+
+      import ./trans/all
+      intlPostlude(currentSourcePath(), "trans")
+    
+    3. Add locales from the command-line with this command:
+
+      $ intl add LOCALENAME
+    """
+  of "add":
+    let transdir = "."/"trans"
+    let locale = paramStr(2)
+    let locale_file = transdir / locale & ".nim"
+    if not locale_file.existsFile:
+      writeFile(locale_file, dedent("""
+      import ./base
+
+      messages """ & '"' & locale & '"' & """:
+        discard
+      """))
+      echo "Created " & locale_file
+    else:
+      echo "Error: file " & locale_file & " already exists"
+      quit(1)
   else:
     echo "unknown command: " & cmd
     quit(1)
