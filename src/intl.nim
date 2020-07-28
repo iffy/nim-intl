@@ -129,6 +129,7 @@ template intlCatalog*(name:string) =
       if output.exitCode != 0:
         echo "intl: ", output.output
         echo "intl: Failed to make autoDir: " & autoDir
+      echo "pwd:\l" & utilityCall("pwd").output
     
     var postludeParts:seq[string]
     postludeParts.add "## ==== intl postlude ===="
@@ -421,7 +422,10 @@ when isMainModule:
   of "mkdir":
     let dir = getArg()
     if not dir.existsDir:
+      echo "attempting to create: " & dir
       createDir(dir)
+    else:
+      echo "directory already exists: " & dir
   of "ls":
     let dir = getArg()
     echo toSeq(walkDir(dir)).mapIt(it.path.extractFilename()).join("\l")
