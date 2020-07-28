@@ -1,19 +1,30 @@
-name: test
+name: tests
 
 on:
   push:
+    branches-ignore: [gh-pages]
   pull_request:
+    branches: [master]
+  schedule:
+    - cron: '0 0 * * 1'
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        nimversion: [stable]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        nimversion:
+        - stable
+        - devel
+        os:
+        - ubuntu-latest
+        - macOS-latest
+        - windows-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: iffy/install-nim@master
+    - uses: iffy/install-nim@v1.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         nimversion: ${{ matrix.nimversion }}
     - name: Install deps

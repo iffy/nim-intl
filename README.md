@@ -45,7 +45,7 @@ baseMessages:
 ## ==== end intl postlude ====
 ```
 
-Let's put the `baseMessages:` block in as well as the start of a locale for Spanish using `messages "localname":`:
+Let's put the `baseMessages:` block in as well as the start of a locale for Spanish using `messages "localename":`:
 
 ```nim
 import intl
