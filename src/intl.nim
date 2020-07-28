@@ -115,26 +115,20 @@ template intlCatalog*(name:string) =
 
   macro setLocale*(locale:string):untyped =
     setLocaleMacro(locale)
-
-  proc utilityCall*(command:string, arg:string = ""):tuple[output:string,exitCode:int] {.compileTime.} =
-    var cmd_string = "intl " & command
-    when defined(windows):
-      cmd_string = "cmd /c " & cmd_string
-    let output = gorgeEx(cmd_string, input=arg)
-    result = (output.output, output.exitCode)
+  
+  proc staticListDir(dirname:string):string {.compileTime.} =
+    gorge("ls " & dirname)
+  
+  proc staticCreateDir(dirname:string):bool {.compileTime.} =
+    return gorgeEx("mkdir " & dirname).exitCode == 0
 
   proc staticIntlPostlude*(baseDir:string, autoSubDir:string) {.compileTime.} =
     ## Save extracted strings to files
     let autoDir = if baseDir != "" and autoSubDir != "": baseDir/autoSubDir else: ""
     if autoDir != "":
       echo "intl: autoDir=", autoDir
-      let output = utilityCall("mkdir", autoDir)
-      if output.exitCode != 0:
-        echo "intl: ", output.output
+      if not staticCreateDir(autoDir):
         echo "intl: Failed to make autoDir: " & autoDir
-      let pwd = utilityCall("pwd")
-      echo "pwd.exitCode: " & $pwd.exitCode
-      echo "pwd.output: " & pwd.output
     
     var postludeParts:seq[string]
     postludeParts.add "## ==== intl postlude ===="
@@ -160,7 +154,7 @@ template intlCatalog*(name:string) =
       intlCatalog """ & "\"" & name & "\"\L" & """
       """) & baseMessages_string)
       echo "intl: wrote " & autoSubDir/"base.nim"
-      let nimfiles = utilityCall("ls", autoDir).output.splitLines()
+      let nimfiles = staticListDir(autoDir).splitLines()
       for filename in nimfiles:
         let locale_name = filename.changeFileExt("")
         if locale_name != "base" and locale_name != "all":
@@ -419,24 +413,8 @@ template intlCatalog*(name:string) =
 when isMainModule:
   import strutils
   import sequtils
-  # intl utility
-  proc getArg():string {.inline.} =
-    stdin.readAll()
   let cmd = paramStr(1)
   case cmd
-  of "mkdir":
-    let dir = getArg()
-    if not dir.existsDir:
-      echo "attempting to create: " & dir
-      createDir(dir)
-    else:
-      echo "directory already exists: " & dir
-  of "ls":
-    let dir = getArg()
-    echo toSeq(walkDir(dir)).mapIt(it.path.extractFilename()).join("\l")
-  of "pwd":
-    echo "getCurrentDir: ", getCurrentDir()
-    echo "currentSourcePath: ", currentSourcePath()
   of "init":
     let transdir = "."/"trans"
     if transdir.existsDir:
