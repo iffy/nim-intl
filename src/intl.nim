@@ -117,7 +117,10 @@ template intlCatalog*(name:string) =
     setLocaleMacro(locale)
 
   proc utilityCall*(command:string, arg:string = ""):tuple[output:string,exitCode:int] {.compileTime.} =
-    let output = gorgeEx("intl " & command, input=arg)
+    var cmd_string = "intl " & command
+    when defined(windows):
+      cmd_string = "cmd /c " & cmd_string
+    let output = gorgeEx(cmd_string, input=arg)
     result = (output.output, output.exitCode)
 
   proc staticIntlPostlude*(baseDir:string, autoSubDir:string) {.compileTime.} =
