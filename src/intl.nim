@@ -130,7 +130,7 @@ template intlCatalog*(name:string) =
         echo "intl: ", output.output
         echo "intl: Failed to make autoDir: " & autoDir
       let pwd = utilityCall("pwd")
-      echo "pwd.exitCode: " & pwd.exitCode
+      echo "pwd.exitCode: " & $pwd.exitCode
       echo "pwd.output: " & pwd.output
     
     var postludeParts:seq[string]
