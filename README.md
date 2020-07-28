@@ -1,5 +1,7 @@
 The `intl` Nim package make it easy to do internationalization (i18n) and localization (l10n) in Nim programs.
 
+[![tests](https://github.com/iffy/nim-intl/workflows/tests/badge.svg)](https://github.com/iffy/nim-intl/actions)
+
 This is alpha-quality.  Please file issues for any bugs you encounter.
 
 # Features
