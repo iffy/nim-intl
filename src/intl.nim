@@ -1,13 +1,10 @@
-import macros
-export macros
-import sets
-export sets
-import tables
-export tables
-import strutils
 import hashes
-import os
-export os
+import strutils
+
+import macros; export macros
+import sets; export sets
+import tables; export tables
+import os; export os
 
 type
   MessageStatus = enum
@@ -58,6 +55,11 @@ proc dedent*(x:string):string =
   
   result = unindent(x, chars)
 
+proc staticListDir(dirname:string):string {.compileTime.} =
+  gorge("ls " & dirname).strip()
+  
+proc staticCreateDir(dirname:string):bool {.compileTime.} =
+  return gorgeEx("mkdir " & dirname).exitCode == 0
 
 
 template intlCatalog*(name:string) =
@@ -115,12 +117,6 @@ template intlCatalog*(name:string) =
 
   macro setLocale*(locale:string):untyped =
     setLocaleMacro(locale)
-  
-  proc staticListDir(dirname:string):string {.compileTime.} =
-    gorge("ls " & dirname)
-  
-  proc staticCreateDir(dirname:string):bool {.compileTime.} =
-    return gorgeEx("mkdir " & dirname).exitCode == 0
 
   proc staticIntlPostlude*(baseDir:string, autoSubDir:string) {.compileTime.} =
     ## Save extracted strings to files
