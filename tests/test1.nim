@@ -52,6 +52,7 @@ test "import":
 
 test "managedir":
   withtmpdir:
+    checkpoint "== start"
     let trans_dir = absolutePath("."/"trans")
     writeFile("src.nim", dedent &"""
     import intl
@@ -59,6 +60,7 @@ test "managedir":
     echo tr("hi","hi")
     intlPostlude(currentSourcePath(), autoDir="trans")
     """)
+    checkpoint "== compile 1"
     discard comp("src.nim")
     assert existsDir("trans")
 
@@ -80,7 +82,7 @@ test "managedir":
     check "import intl" in allfileguts
     check "export intl" in allfileguts
 
-    # add some locales
+    checkpoint "== add some locales"
     writeFile("src.nim", dedent &"""
     import ./trans/all
     echo tr("hi","hi")
@@ -90,6 +92,7 @@ test "managedir":
     writeFile("trans"/"en_GB.nim", "")
     writeFile("trans"/"en.nim", "")
 
+    checkpoint "== compile 2"
     discard comp("src.nim")
 
     basefileguts = basefile.readFile()
@@ -112,6 +115,6 @@ test "managedir":
     check "todo" in esguts
     check "\"hi\"" in esguts
 
-    # Does it still compile?
+    checkpoint "== does it still compile?"
     discard comp("src.nim")
 
